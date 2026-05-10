@@ -1,0 +1,4 @@
+.kubeconfig-temp
+join-command.sh
+.DS_Store
+*.db
