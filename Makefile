@@ -43,7 +43,7 @@ up-ready: up-vanilla
 	done
 	@rm -f join-command.sh
 	@echo ">>> Syncing kubeconfig to all nodes..."
-	@orb run -m cp-master cat ~/.kube/config > .kubeconfig-temp
+	@orb run -m cp-master bash -c "sudo cp /etc/kubernetes/admin.conf ~/.kube/config && sudo chown \$$(id -u):\$$(id -g) ~/.kube/config && cat ~/.kube/config" > .kubeconfig-temp
 	@for node in $(NODES); do \
 		echo "Syncing config to $$node..."; \
 		orb run -m $$node bash -c "mkdir -p ~/.kube && cat > ~/.kube/config" < .kubeconfig-temp || exit 1; \
