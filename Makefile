@@ -49,6 +49,10 @@ up-ready: up-vanilla
 		orb run -m $$node bash -c "mkdir -p ~/.kube && cat > ~/.kube/config" < .kubeconfig-temp || exit 1; \
 	done
 	@rm .kubeconfig-temp
+	@echo ">>> Installing Helm on cp-master..."
+	@orb run -m cp-master bash scripts/helm-install.sh || exit 1
+	@echo ">>> Installing Gateway API and Envoy Gateway on cp-master..."
+	@orb run -m cp-master bash scripts/gateway-install.sh || exit 1
 	@$(MAKE) push-labs
 	@echo ">>> Cluster is ready!"
 	@echo ">>> Run 'make ssh-cp' to access the control plane."
