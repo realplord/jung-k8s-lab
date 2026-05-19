@@ -16,8 +16,7 @@ sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 echo ">>> Installing Calico CNI..."
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/tigera-operator.yaml
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/custom-resources.yaml
+bash scripts/install-calico.sh
 
 echo ">>> Generating join command for workers..."
 kubeadm token create --print-join-command > join-command.sh

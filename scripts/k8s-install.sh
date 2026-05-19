@@ -16,7 +16,7 @@ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.
 
 echo ">>> Installing kubelet, kubeadm, kubectl..."
 sudo apt-get update
-sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-get install -y kubelet kubeadm kubectl cri-tools
 sudo apt-mark hold kubelet kubeadm kubectl
 
 echo ">>> Configuring kubectl aliases and completion..."
