@@ -2,6 +2,6 @@
 join-command.sh
 .DS_Store
 *.db
-sander-cka/
+sander-cka
 join-worker.sh
 join-control.sh

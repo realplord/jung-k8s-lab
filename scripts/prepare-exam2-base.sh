@@ -62,9 +62,9 @@ orb run -m "${BASE_NAME}" bash -c "cd sander-cka && sudo bash setup-kubetools-pr
 echo ">>> Explicitly installing cri-tools..."
 orb run -m "${BASE_NAME}" sudo apt-get install -y cri-tools
 
-# 6. Pre-install required pre-flight tools (conntrack, socat)
+# 6. Pre-install required pre-flight tools (conntrack, socat) and etcd-client
 echo ">>> Restoring clean Containerd configuration and pre-flight tools..."
-orb run -m "${BASE_NAME}" sudo apt-get install -y conntrack socat
+orb run -m "${BASE_NAME}" sudo apt-get install -y conntrack socat etcd-client
 orb run -m "${BASE_NAME}" sudo apt-get install --reinstall -y containerd
 orb run -m "${BASE_NAME}" sudo rm -f /usr/local/bin/containerd /usr/local/bin/containerd-shim-runc-v2 /usr/local/bin/containerd-stress /usr/local/bin/ctr /usr/local/sbin/runc
 orb run -m "${BASE_NAME}" bash -c "sudo mkdir -p /etc/containerd && /usr/bin/containerd config default | sudo tee /etc/containerd/config.toml > /dev/null"

@@ -81,7 +81,11 @@ orb run -m control bash scripts/helm-install.sh || exit 1
 echo ">>> Installing Gateway API and Envoy Gateway on control plane..."
 orb run -m control bash scripts/gateway-install.sh || exit 1
 
-# 8. Prepare lab scripts and grading symlinks
+# 8. Install etcd-client on control plane node
+echo ">>> Installing etcd-client on control plane..."
+orb run -m control bash -c "sudo apt-get update && sudo apt-get install -y etcd-client"
+
+# 9. Prepare lab scripts and grading symlinks
 echo ">>> Preparing lab scripts and links on control..."
 orb run -m control bash -c "chmod +x scripts/*.sh"
 orb run -m control bash -c "mkdir -p ~/labs && ln -sf \$(pwd)/scripts/etcd-backup.sh ~/labs/etcd-backup.sh"
