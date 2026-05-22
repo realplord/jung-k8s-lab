@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CKA Mock Exam 03 - Kubernetes Gateway API Portal</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-base: #06090e;
+            --bg-surface: rgba(10, 16, 26, 0.8);
+            --bg-card: rgba(17, 27, 43, 0.5);
+            --border-glow: rgba(16, 185, 129, 0.15);
+            --border-glow-active: rgba(16, 185, 129, 0.45);
+            
+            --primary: #10b981;
+            --primary-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-inverse: #ffffff;
+            
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 5% 15%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(at 95% 85%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+        }
+
+        header {
+            background: rgba(6, 9, 14, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            background: var(--primary-gradient);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .logo-title h1 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-title p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .exam-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* Timer Widgets */
+        .timer-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            padding: 0.4rem 1rem 0.4rem 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .timer-btn {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        .timer-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .timer-time {
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            letter-spacing: 0.5px;
+        }
+
+        /* Main Layout */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+        }
+
+        /* Sidebar Tracker */
+        .sidebar {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glow);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 6.5rem;
+        }
+
+        .progress-box {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1rem;
+        }
+
+        .progress-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .progress-circle .bg-circle {
+            stroke: rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-circle .fg-circle {
+            stroke: url(#gradient-stroke);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .progress-sub {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-item:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .nav-item.completed {
+            color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.04);
+            border-color: rgba(16, 185, 129, 0.15);
+        }
+
+        .nav-item.completed i {
+            color: var(--accent-green);
+        }
+
+        /* Question Cards Area */
+        .questions-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .intro-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.03) 100%);
+            border: 1px solid var(--border-glow);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .intro-card h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .intro-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.25rem;
+            max-width: 800px;
+        }
+
+        .badge-list {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .badge i {
+            color: var(--primary);
+        }
+
+        /* Question Cards */
+        .q-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glow);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            position: relative;
+            transition: var(--transition-smooth);
+        }
+
+        .q-card:hover {
+            border-color: var(--border-glow-active);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.03);
+        }
+
+        .q-card.completed {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(16, 185, 129, 0.01) 100%);
+        }
+
+        .q-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+            gap: 1rem;
+        }
+
+        .q-title-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .q-checkbox {
+            position: relative;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 0.5rem;
+            border: 2px solid var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-smooth);
+            background: transparent;
+        }
+
+        .q-checkbox:hover {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .q-checkbox i {
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: var(--transition-smooth);
+        }
+
+        .q-checkbox.checked {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .q-checkbox.checked i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .q-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .q-points {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.25rem 0.6rem;
+            border-radius: 0.375rem;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            text-transform: uppercase;
+        }
+
+        .q-card.completed .q-points {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+
+        .q-body {
+            color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            padding-left: 2.75rem;
+        }
+
+        .q-body p {
+            margin-bottom: 1rem;
+        }
+
+        .q-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .q-body ul {
+            margin-left: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .q-body li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Copy Code Blocks */
+        .code-container {
+            position: relative;
+            margin: 1.25rem 0;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: var(--font-mono);
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        .copy-btn:hover {
+            color: var(--text-main);
+        }
+
+        pre {
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: #ecf0f1;
+        }
+
+        .inline-code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.375rem;
+            padding: 0.1rem 0.35rem;
+            font-size: 0.85rem;
+            color: #34d399;
+            word-break: break-word;
+        }
+
+        /* Success Pop Notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--accent-green);
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateY(150%);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: var(--accent-green);
+            font-size: 1.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+                margin-bottom: 1.5rem;
+            }
+
+            .nav-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .exam-info {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.75rem;
+            }
+
+            .timer-container {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-list {
+                grid-template-columns: 1fr;
+            }
+
+            .q-body {
+                padding-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Header -->
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="fa-solid fa-dharmachakra"></i>
+            </div>
+            <div class="logo-title">
+                <h1>CKA MOCK EXAM 03</h1>
+                <p>Kubernetes Gateway API Practice Portal</p>
+            </div>
+        </div>
+        <div class="exam-info">
+            <div class="timer-container">
+                <button class="timer-btn" id="timer-toggle-btn" onclick="toggleTimer()">
+                    <i class="fa-solid fa-play" id="timer-icon"></i>
+                </button>
+                <span>TIME LEFT:</span>
+                <span class="timer-time" id="countdown-display">120:00</span>
+                <button class="timer-btn" onclick="resetTimer()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="container">
+        <!-- Sidebar Tracker -->
+        <aside class="sidebar">
+            <div class="progress-box">
+                <div class="progress-circle">
+                    <svg>
+                        <defs>
+                            <linearGradient id="gradient-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                        <circle class="bg-circle" cx="60" cy="60" r="52" />
+                        <circle class="fg-circle" cx="60" cy="60" r="52" stroke-dasharray="327" stroke-dashoffset="327" />
+                    </svg>
+                    <div class="progress-text" id="pct-label">0%</div>
+                </div>
+                <div class="progress-sub" id="score-label">0 / 10 Points</div>
+            </div>
+
+            <ul class="nav-list">
+                <li class="nav-item" id="nav-q1" onclick="scrollToQuestion(1)">
+                    <i class="fa-regular fa-circle"></i> Question 1
+                </li>
+                <li class="nav-item" id="nav-q2" onclick="scrollToQuestion(2)">
+                    <i class="fa-regular fa-circle"></i> Question 2
+                </li>
+                <li class="nav-item" id="nav-q3" onclick="scrollToQuestion(3)">
+                    <i class="fa-regular fa-circle"></i> Question 3
+                </li>
+                <li class="nav-item" id="nav-q4" onclick="scrollToQuestion(4)">
+                    <i class="fa-regular fa-circle"></i> Question 4
+                </li>
+                <li class="nav-item" id="nav-q5" onclick="scrollToQuestion(5)">
+                    <i class="fa-regular fa-circle"></i> Question 5
+                </li>
+                <li class="nav-item" id="nav-q6" onclick="scrollToQuestion(6)">
+                    <i class="fa-regular fa-circle"></i> Question 6
+                </li>
+                <li class="nav-item" id="nav-q7" onclick="scrollToQuestion(7)">
+                    <i class="fa-regular fa-circle"></i> Question 7
+                </li>
+                <li class="nav-item" id="nav-q8" onclick="scrollToQuestion(8)">
+                    <i class="fa-regular fa-circle"></i> Question 8
+                </li>
+                <li class="nav-item" id="nav-q9" onclick="scrollToQuestion(9)">
+                    <i class="fa-regular fa-circle"></i> Question 9
+                </li>
+                <li class="nav-item" id="nav-q10" onclick="scrollToQuestion(10)">
+                    <i class="fa-regular fa-circle"></i> Question 10
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Right Side: Questions list -->
+        <main class="questions-area">
+            <!-- Informational Banner -->
+            <div class="intro-card">
+                <h2>Welcome Candidate!</h2>
+                <p>Ensure you run <span class="inline-code">./setup.sh</span> on your control plane host node before starting this exam. You may use the official Kubernetes or Gateway API documentation for assistance during your session.</p>
+                <div class="badge-list">
+                    <div class="badge">
+                        <i class="fa-regular fa-clock"></i> Time Limit: 120 Minutes
+                    </div>
+                    <div class="badge">
+                        <i class="fa-regular fa-star"></i> Total: 10 Points
+                    </div>
+                    <div class="badge">
+                        <i class="fa-regular fa-circle-check"></i> Passing: 7 Points
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q1 Card -->
+            <div class="q-card" id="q1">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(1)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 1: Provisioning a Shared Gateway</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create a Gateway resource named <span class="inline-code">shared-gateway</span> in the namespace <span class="inline-code">infra-ns</span> using the <span class="inline-code">envoy-gateway</span> GatewayClass.</p>
+                    <ul>
+                        <li>The Gateway should listen on port <span class="inline-code">80</span> (HTTP) with the listener name <span class="inline-code">http</span>.</li>
+                        <li>Configure it to allow route attachments from <strong>all namespaces</strong> (<span class="inline-code">from: All</span>).</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>GATEWAY MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: shared-gateway
+  namespace: infra-ns
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: All
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 Card -->
+            <div class="q-card" id="q2">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(2)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 2: Basic HTTPRoute Path Routing</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create an HTTPRoute resource named <span class="inline-code">alpha-route</span> in the <span class="inline-code">alpha</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in the <span class="inline-code">infra-ns</span> namespace.</li>
+                        <li>It should match requests for the hostname <span class="inline-code">alpha.example.com</span> with the path prefix <span class="inline-code">/api</span>.</li>
+                        <li>All matched traffic should be forwarded to the Service <span class="inline-code">alpha-svc</span> on port <span class="inline-code">8080</span> in the <span class="inline-code">alpha</span> namespace.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>HTTPROUTE MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alpha-route
+  namespace: alpha
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "alpha.example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: alpha-svc
+      port: 8080
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 Card -->
+            <div class="q-card" id="q3">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(3)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 3: Split Traffic / Canary Routing</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create an HTTPRoute named <span class="inline-code">canary-route</span> in the <span class="inline-code">production</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in <span class="inline-code">infra-ns</span>.</li>
+                        <li>It should match traffic for host <span class="inline-code">app.example.com</span>.</li>
+                        <li>Route traffic dynamically split between two services in the <span class="inline-code">production</span> namespace:
+                            <ul>
+                                <li><span class="inline-code">app-v1</span> on port <span class="inline-code">80</span> with a weight of <span class="inline-code">90</span></li>
+                                <li><span class="inline-code">app-v2</span> on port <span class="inline-code">80</span> with a weight of <span class="inline-code">10</span></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>CANARY ROUTE MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: canary-route
+  namespace: production
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "app.example.com"
+  rules:
+  - backendRefs:
+    - name: app-v1
+      port: 80
+      weight: 90
+    - name: app-v2
+      port: 80
+      weight: 10
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4 Card -->
+            <div class="q-card" id="q4">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(4)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 4: Header-Based Routing</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create an HTTPRoute named <span class="inline-code">version-router</span> in the <span class="inline-code">beta</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in <span class="inline-code">infra-ns</span> and match traffic for host <span class="inline-code">beta.example.com</span>.</li>
+                        <li>If a request contains the HTTP header <span class="inline-code">version: v2</span>, forward the traffic to the Service <span class="inline-code">beta-v2-svc</span> on port <span class="inline-code">80</span>.</li>
+                        <li>For all other default requests, forward traffic to the Service <span class="inline-code">beta-v1-svc</span> on port <span class="inline-code">80</span>.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>HEADER ROUTER MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: version-router
+  namespace: beta
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "beta.example.com"
+  rules:
+  - matches:
+    - headers:
+      - name: version
+        value: v2
+    backendRefs:
+    - name: beta-v2-svc
+      port: 80
+  - backendRefs:
+    - name: beta-v1-svc
+      port: 80
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q5 Card -->
+            <div class="q-card" id="q5">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(5)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 5: HTTP Path Redirects</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create an HTTPRoute named <span class="inline-code">legacy-redirect</span> in the <span class="inline-code">default</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in <span class="inline-code">infra-ns</span> and match traffic for the host <span class="inline-code">example.com</span>.</li>
+                        <li>If a request has the path prefix <span class="inline-code">/legacy</span>, redirect it with a <span class="inline-code">301</span> (Moved Permanently) status code to the path prefix <span class="inline-code">/new-api</span>. No traffic should hit a backend service for this rule.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>REDIRECT ROUTE MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: legacy-redirect
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /legacy
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /new-api
+        statusCode: 301
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q6 Card -->
+            <div class="q-card" id="q6">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(6)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 6: URL Prefix Rewriting</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create an HTTPRoute named <span class="inline-code">rewrite-route</span> in the <span class="inline-code">default</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in <span class="inline-code">infra-ns</span> and match traffic for the host <span class="inline-code">example.com</span>.</li>
+                        <li>When requests hit path prefix <span class="inline-code">/v1/service</span>, rewrite the URL path prefix to <span class="inline-code">/service</span> before forwarding the request to the Service <span class="inline-code">backend-svc</span> on port <span class="inline-code">8080</span> in the <span class="inline-code">default</span> namespace.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>REWRITE ROUTE MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: rewrite-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /v1/service
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /service
+    backendRefs:
+    - name: backend-svc
+      port: 8080
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7 Card -->
+            <div class="q-card" id="q7">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(7)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 7: Cross-Namespace Ingress Restrictions</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create a Gateway resource named <span class="inline-code">secure-gateway</span> in the <span class="inline-code">secure-infra</span> namespace using the <span class="inline-code">envoy-gateway</span> GatewayClass.</p>
+                    <ul>
+                        <li>The Gateway should listen on port <span class="inline-code">80</span> (HTTP) with name <span class="inline-code">http</span>.</li>
+                        <li>Restrict route attachment: configure the listener to <strong>only</strong> accept HTTPRoutes from namespaces that have the label <span class="inline-code">environment: production</span>.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>SECURE GATEWAY MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: secure-gateway
+  namespace: secure-infra
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            environment: production
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q8 Card -->
+            <div class="q-card" id="q8">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(8)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 8: Troubleshooting Route Attachment</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>A pre-deployed HTTPRoute named <span class="inline-code">broken-route</span> in the <span class="inline-code">gamma</span> namespace is currently failing to attach to <span class="inline-code">shared-gateway</span>.</p>
+                    <ul>
+                        <li>Diagnose why it is not reconciling properly. (Look at missing parent namespace reference and service name mismatches).</li>
+                        <li>Fix all errors in the HTTPRoute definition so that it attaches successfully to <span class="inline-code">shared-gateway</span> and achieves a <span class="inline-code">Reconciled</span> / <span class="inline-code">Accepted</span> status.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>TROUBLESHOOTING REPLACEMENT (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: broken-route
+  namespace: gamma
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "gamma.example.com"
+  rules:
+  - backendRefs:
+    - name: gamma-svc
+      port: 80
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q9 Card -->
+            <div class="q-card" id="q9">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(9)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 9: HTTP Response Header Modification</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create an HTTPRoute named <span class="inline-code">header-enricher</span> in the <span class="inline-code">default</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in <span class="inline-code">infra-ns</span> and match traffic for host <span class="inline-code">web.example.com</span>.</li>
+                        <li>Route traffic to the Service <span class="inline-code">web-svc</span> on port <span class="inline-code">80</span>.</li>
+                        <li>Apply a filter to inject a custom response header <span class="inline-code">x-gateway-provider: envoy</span> on all successfully completed requests.</li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>HEADER ENRICHER MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: header-enricher
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "web.example.com"
+  rules:
+  - filters:
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: x-gateway-provider
+          value: envoy
+    backendRefs:
+    - name: web-svc
+      port: 80
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q10 Card -->
+            <div class="q-card" id="q10">
+                <div class="q-header">
+                    <div class="q-title-group">
+                        <div class="q-checkbox" onclick="toggleQuestion(10)">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="q-title">Question 10: Multi-Host Routing</h3>
+                    </div>
+                    <div class="q-points">1 point</div>
+                </div>
+                <div class="q-body">
+                    <p>Create a single HTTPRoute named <span class="inline-code">multi-host-route</span> in the <span class="inline-code">default</span> namespace.</p>
+                    <ul>
+                        <li>It should attach to the <span class="inline-code">shared-gateway</span> in <span class="inline-code">infra-ns</span>.</li>
+                        <li>Configure the route to handle traffic for two distinct hostnames:
+                            <ul>
+                                <li>Requests for <span class="inline-code">shop.example.com</span> should route to the Service <span class="inline-code">shop-svc</span> on port <span class="inline-code">80</span>.</li>
+                                <li>Requests for <span class="inline-code">blog.example.com</span> should route to the Service <span class="inline-code">blog-svc</span> on port <span class="inline-code">80</span>.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span>MULTI-HOST MANIFEST (YAML)</span>
+                            <button class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <pre><code>cat &lt;&lt;EOF | kubectl apply -f -
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: multi-host-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "shop.example.com"
+  - "blog.example.com"
+  rules:
+  - matches:
+    - headers:
+      - name: host
+        value: shop.example.com
+    backendRefs:
+    - name: shop-svc
+      port: 80
+  - matches:
+    - headers:
+      - name: host
+        value: blog.example.com
+    backendRefs:
+    - name: blog-svc
+      port: 80
+EOF</code></pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Success Toast Pop -->
+    <div class="toast" id="toast-notif">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-text">Text successfully copied!</span>
+    </div>
+
+    <script>
+        // Progress State
+        const completedQuestions = new Set();
+        const totalScore = 10;
+        
+        // Progress Circle Logic
+        const circumference = 327; // 2 * pi * r (2 * 3.14159 * 52)
+        const fgCircle = document.querySelector('.fg-circle');
+        
+        function updateProgress() {
+            const count = completedQuestions.size;
+            const percentage = (count / totalScore) * 100;
+            
+            // Update Labels
+            document.getElementById('pct-label').textContent = Math.round(percentage) + '%';
+            document.getElementById('score-label').textContent = `${count} / ${totalScore} Points`;
+            
+            // Update Circular stroke offset
+            const offset = circumference - (percentage / 100) * circumference;
+            fgCircle.style.strokeDashoffset = offset;
+        }
+
+        // Toggle state
+        function toggleQuestion(num) {
+            const card = document.getElementById(`q${num}`);
+            const checkbox = card.querySelector('.q-checkbox');
+            const navItem = document.getElementById(`nav-q${num}`);
+            
+            if (completedQuestions.has(num)) {
+                completedQuestions.delete(num);
+                checkbox.classList.remove('checked');
+                card.classList.remove('completed');
+                navItem.classList.remove('completed');
+                navItem.querySelector('i').className = 'fa-regular fa-circle';
+            } else {
+                completedQuestions.add(num);
+                checkbox.classList.add('checked');
+                card.classList.add('completed');
+                navItem.classList.add('completed');
+                navItem.querySelector('i').className = 'fa-solid fa-circle-check';
+                
+                showToast(`Question ${num} marked completed!`);
+            }
+            updateProgress();
+        }
+
+        // Smooth Scroll to Cards
+        function scrollToQuestion(num) {
+            const el = document.getElementById(`q${num}`);
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Add a subtle border glow animation to draw attention
+            el.style.borderColor = 'var(--primary)';
+            setTimeout(() => {
+                if (!completedQuestions.has(num)) {
+                    el.style.borderColor = 'var(--border-glow)';
+                } else {
+                    el.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                }
+            }, 1000);
+        }
+
+        // Timer Logic
+        let timerSeconds = 120 * 60;
+        let timerInterval = null;
+        let timerRunning = false;
+
+        const countdownDisplay = document.getElementById('countdown-display');
+        const timerIcon = document.getElementById('timer-icon');
+
+        function toggleTimer() {
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                timerIcon.className = 'fa-solid fa-play';
+                timerRunning = false;
+                showToast("Timer Paused");
+            } else {
+                timerRunning = true;
+                timerIcon.className = 'fa-solid fa-pause';
+                showToast("Timer Started");
+                timerInterval = setInterval(() => {
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        countdownDisplay.textContent = "00:00";
+                        showToast("Time is UP!");
+                        return;
+                    }
+                    timerSeconds--;
+                    const minutes = Math.floor(timerSeconds / 60);
+                    const seconds = timerSeconds % 60;
+                    countdownDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }, 1000);
+            }
+        }
+
+        // Reset timer
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerSeconds = 120 * 60;
+            countdownDisplay.textContent = "120:00";
+            timerIcon.className = 'fa-solid fa-play';
+            timerRunning = false;
+            showToast("Timer Reset");
+        }
+
+        // Copy Clipboard logic
+        function copyCode(btn) {
+            const container = btn.closest('.code-container');
+            const code = container.querySelector('code').innerText;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                showToast("Configuration copied to clipboard!");
+            });
+        }
+
+        // Pop Toast notification
+        function showToast(text) {
+            const toast = document.getElementById('toast-notif');
+            document.getElementById('toast-text').textContent = text;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Init setup
+        updateProgress();
+    </script>
+</body>
+</html>

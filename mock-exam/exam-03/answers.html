@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CKA Mock Exam 03 Solutions | Antigravity Gateway API Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #060c0e;
+      --panel-dark: rgba(10, 24, 27, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --neon-primary: #10b981;
+      --neon-secondary: #06b6d4;
+      --neon-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --neon-glow: 0 0 20px rgba(16, 185, 129, 0.25);
+      
+      --accent-blue: #3b82f6;
+      --accent-yellow: #fbbf24;
+      --accent-red: #ef4444;
+      
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* App Container */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: rgba(4, 11, 13, 0.85);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(to bottom, rgba(16, 185, 129, 0.05), transparent);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--neon-gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--neon-glow);
+    }
+
+    .logo-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: var(--neon-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-badge {
+      font-size: 11px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .progress-section {
+      margin-top: 16px;
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--neon-gradient);
+      width: 0%;
+      transition: width 0.4s ease;
+      box-shadow: var(--neon-glow);
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .menu-item.active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+      box-shadow: inset 0 0 12px rgba(16, 185, 129, 0.05);
+    }
+
+    .menu-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 25%;
+      height: 50%;
+      width: 4px;
+      background: var(--neon-gradient);
+      border-radius: 0 4px 4px 0;
+      box-shadow: var(--neon-glow);
+    }
+
+    .menu-item-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-color);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .menu-item-checkbox svg {
+      width: 10px;
+      height: 10px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 3px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s;
+    }
+
+    .menu-item.completed .menu-item-checkbox {
+      background: var(--neon-primary);
+      border-color: var(--neon-primary);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .menu-item.completed .menu-item-checkbox svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .menu-item-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .menu-item-number {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .menu-item.active .menu-item-number {
+      color: #34d399;
+    }
+
+    .menu-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-main);
+    }
+
+    .sidebar-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(4, 11, 13, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 40px;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.04) 0px, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Panel */
+    .header-panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-panel-info h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-panel-info p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .meta-tags {
+      display: flex;
+      gap: 12px;
+    }
+
+    .meta-tag {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--neon-primary);
+      stroke-width: 2px;
+    }
+
+    /* Solution Panel */
+    .solution-panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .solution-panel.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel-section-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+
+    .panel-section-title svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--neon-primary);
+      stroke-width: 2px;
+    }
+
+    .challenge-card {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 18px 24px;
+      line-height: 1.6;
+      font-size: 15px;
+      color: #e5e7eb;
+    }
+
+    .strategy-card {
+      background: rgba(16, 185, 129, 0.02);
+      border-left: 4px solid var(--neon-primary);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 24px;
+      line-height: 1.6;
+      font-size: 14px;
+      color: #d1d5db;
+    }
+
+    /* Code Container / IDE style */
+    .ide-container {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: #03080a;
+      overflow: hidden;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .ide-header {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .ide-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ide-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+    }
+
+    .ide-dot-red { background: #ef4444; }
+    .ide-dot-yellow { background: #f59e0b; }
+    .ide-dot-green { background: #10b981; }
+
+    .ide-filename {
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .copy-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 2px;
+      fill: none;
+    }
+
+    .ide-body {
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    .ide-body code {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #a7f3d0;
+      display: block;
+      white-space: pre;
+    }
+
+    .comment { color: #5b707a; }
+    .keyword { color: #ff7b72; font-weight: 500; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .symbol { color: #79c0ff; }
+    .yaml-key { color: #7ee787; }
+
+    /* Verification Box */
+    .verification-box {
+      background: rgba(16, 185, 129, 0.02);
+      border: 1px dashed rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .verification-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--neon-primary);
+    }
+
+    .verification-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2px;
+      fill: none;
+    }
+
+    .verification-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .verification-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #34d399;
+    }
+
+    .verification-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      font-family: 'Fira Code', monospace;
+      white-space: pre-line;
+    }
+
+    /* Mastered Footer Action */
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+      margin-top: 16px;
+    }
+
+    .mastered-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .mastered-btn:hover {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .solution-panel.completed-panel .mastered-btn {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--neon-primary);
+      color: #34d399;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      background: transparent;
+      border-color: var(--border-color);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(4, 11, 13, 0.95);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--neon-glow);
+      padding: 14px 24px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 999;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--neon-primary);
+      stroke-width: 3px;
+      fill: none;
+    }
+
+    /* Intro Panel */
+    .intro-panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 48px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .intro-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--neon-gradient);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--neon-glow);
+      margin-bottom: 8px;
+    }
+
+    .intro-icon svg {
+      width: 44px;
+      height: 44px;
+      fill: #fff;
+    }
+
+    .intro-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .intro-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    .start-btn {
+      background: var(--neon-gradient);
+      border: none;
+      color: #fff;
+      padding: 16px 36px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--neon-glow);
+      transition: all 0.25s;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-1.3,1.3a1,1,0,0,0-.21,1.09A1,1,0,0,0,3.67,21.3l.08,0h4A10,10,0,1,0,12,2Zm5.71,14.29a1,1,0,0,1-1.42,0L14,14l-2.29,2.29a1,1,0,0,1-1.42,0,1,1,0,0,1,0-1.42L12.59,12,10.29,9.71a1,1,0,0,1,0-1.42,1,1,0,0,1,1.42,0L14,10.59l2.29-2.29a1,1,0,0,1,1.42,1.42L15.41,12l2.3,2.29A1,1,0,0,1,17.71,16.29Z"/>
+            </svg>
+          </div>
+          <span class="logo-text">Antigravity Labs</span>
+        </div>
+        <div>
+          <span class="logo-badge">CKA Gateway API Exam 03</span>
+        </div>
+        
+        <div class="progress-section">
+          <div class="progress-text">
+            <span>Mastery Progress</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu" id="sidebar-menu">
+        <!-- Sidebar items loaded via JS -->
+      </nav>
+      
+      <div class="sidebar-footer">
+        <span>Gateway API v1.1.0</span>
+        <span>10 Questions</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Info Panel -->
+      <div class="header-panel">
+        <div class="header-panel-info">
+          <h1 id="header-title">Exam 03 Solution Guide</h1>
+          <p id="header-subtitle">Select a question from the sidebar to view its step-by-step master plan.</p>
+        </div>
+        
+        <div class="meta-tags">
+          <div class="meta-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>120 Mins Limit</span>
+          </div>
+          <div class="meta-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>70% Passing Score</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intro Panel -->
+      <div class="intro-panel" id="intro-panel">
+        <div class="intro-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-1.3,1.3a1,1,0,0,0-.21,1.09A1,1,0,0,0,3.67,21.3l.08,0h4A10,10,0,1,0,12,2Zm5.71,14.29a1,1,0,0,1-1.42,0L14,14l-2.29,2.29a1,1,0,0,1-1.42,0,1,1,0,0,1,0-1.42L12.59,12,10.29,9.71a1,1,0,0,1,0-1.42,1,1,0,0,1,1.42,0L14,10.59l2.29-2.29a1,1,0,0,1,1.42,1.42L15.41,12l2.3,2.29A1,1,0,0,1,17.71,16.29Z"/>
+          </svg>
+        </div>
+        <h2 class="intro-title">CKA Gateway API Exam 03 Solution Guide</h2>
+        <p class="intro-desc">
+          Welcome to the study portal for Exam 03! This dashboard houses the interactive step-by-step master plans, strategy overviews, declarative YAML solutions, and validation patterns for all 10 Gateway API topics (Gateways, HTTPRoutes, Canary Routing, Headers, URL Rewriting, redirects, and multi-host bindings).
+        </p>
+        <button class="start-btn" onclick="selectQuestion(0)">Get Started</button>
+      </div>
+
+      <!-- Solution Panels (Loaded via JS) -->
+      <div id="solutions-container"></div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Alert -->
+  <div class="toast" id="toast-notification">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-text">Manifest copied to clipboard!</span>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Q1",
+        category: "Provisioning",
+        title: "Shared Gateway Provisioning",
+        points: "1 Point",
+        challenge: "Create a Gateway resource named `shared-gateway` in the namespace `infra-ns` using the `envoy-gateway` GatewayClass. The Gateway should listen on port `80` (HTTP) with the listener name `http`. Configure it to allow route attachments from all namespaces (`from: All`).",
+        strategy: "Provision a standard Gateway resource mapping the `envoy-gateway` gatewayClassName. Create a listener named `http` using protocol `HTTP` on port `80`, and explicitly configure allowedRoutes namespaces from to be `All` to facilitate cross-namespace routing attachments.",
+        filename: "shared-gateway.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">Gateway</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+  <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">gatewayClassName</span>: <span class="string">envoy-gateway</span>
+  <span class="yaml-key">listeners</span>:
+  - <span class="yaml-key">name</span>: <span class="string">http</span>
+    <span class="yaml-key">protocol</span>: <span class="string">HTTP</span>
+    <span class="yaml-key">port</span>: <span class="number">80</span>
+    <span class="yaml-key">allowedRoutes</span>:
+      <span class="yaml-key">namespaces</span>:
+        <span class="yaml-key">from</span>: <span class="string">All</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: shared-gateway
+  namespace: infra-ns
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: All`,
+        verification: "kubectl get gateway shared-gateway -n infra-ns\nkubectl describe gateway shared-gateway -n infra-ns"
+      },
+      {
+        number: "Q2",
+        category: "Routing",
+        title: "Basic HTTPRoute Path Routing",
+        points: "1 Point",
+        challenge: "Create an HTTPRoute resource named `alpha-route` in the `alpha` namespace. It should attach to the `shared-gateway` in the `infra-ns` namespace. It should match requests for the hostname `alpha.example.com` with the path prefix `/api`. All matched traffic should be forwarded to the Service `alpha-svc` on port `8080` in the `alpha` namespace.",
+        strategy: "Define parentRefs pointing to the namespace-scoped shared-gateway. Declare hostnames list matching `alpha.example.com` and matches with path prefix type `PathPrefix` and value `/api`. Target backendRefs pointing to the `alpha-svc` service on port `8080`.",
+        filename: "alpha-route.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">alpha-route</span>
+  <span class="yaml-key">namespace</span>: <span class="string">alpha</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"alpha.example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">matches</span>:
+    - <span class="yaml-key">path</span>:
+        <span class="yaml-key">type</span>: <span class="string">PathPrefix</span>
+        <span class="yaml-key">value</span>: <span class="string">/api</span>
+    <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">alpha-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">8080</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alpha-route
+  namespace: alpha
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "alpha.example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /api
+    backendRefs:
+    - name: alpha-svc
+      port: 8080`,
+        verification: "kubectl get httproute alpha-route -n alpha\nkubectl describe httproute alpha-route -n alpha"
+      },
+      {
+        number: "Q3",
+        category: "Traffic Control",
+        title: "Canary Traffic Splitting",
+        points: "1 Point",
+        challenge: "Create an HTTPRoute named `canary-route` in the `production` namespace. It should attach to the `shared-gateway` in `infra-ns`. It should match traffic for host `app.example.com`. Route traffic dynamically split between two services in the `production` namespace: `app-v1` on port `80` with a weight of `90`, and `app-v2` on port `80` with a weight of `10`.",
+        strategy: "In the HTTPRoute backendRefs array, specify both destinations: `app-v1` and `app-v2`. Distribute the load by configuring the weight parameter with `90` and `10` respectively. Ensure parentRefs are pointing to `shared-gateway` in namespace `infra-ns`.",
+        filename: "canary-route.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">canary-route</span>
+  <span class="yaml-key">namespace</span>: <span class="string">production</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"app.example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">app-v1</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>
+      <span class="yaml-key">weight</span>: <span class="number">90</span>
+    - <span class="yaml-key">name</span>: <span class="string">app-v2</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>
+      <span class="yaml-key">weight</span>: <span class="number">10</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: canary-route
+  namespace: production
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "app.example.com"
+  rules:
+  - backendRefs:
+    - name: app-v1
+      port: 80
+      weight: 90
+    - name: app-v2
+      port: 80
+      weight: 10`,
+        verification: "kubectl get httproute canary-route -n production\nkubectl describe httproute canary-route -n production"
+      },
+      {
+        number: "Q4",
+        category: "Routing Rules",
+        title: "Header-Based Routing",
+        points: "1 Point",
+        challenge: "Create an HTTPRoute named `version-router` in the `beta` namespace. It should attach to `shared-gateway` in `infra-ns` and match traffic for host `beta.example.com`. If a request contains the HTTP header `version: v2`, forward the traffic to the Service `beta-v2-svc` on port `80`. For all other default requests, forward traffic to the Service `beta-v1-svc` on port `80`.",
+        strategy: "Order your routing rules by specificity. The first rule should match when the headers list contains a name `version` with exact value `v2` and forward to `beta-v2-svc`. The second rule serves as a default catch-all with no matches filter, routing directly to `beta-v1-svc`.",
+        filename: "version-router.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">version-router</span>
+  <span class="yaml-key">namespace</span>: <span class="string">beta</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"beta.example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">matches</span>:
+    - <span class="yaml-key">headers</span>:
+      - <span class="yaml-key">name</span>: <span class="string">version</span>
+        <span class="yaml-key">value</span>: <span class="string">v2</span>
+    <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">beta-v2-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>
+  - <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">beta-v1-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: version-router
+  namespace: beta
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "beta.example.com"
+  rules:
+  - matches:
+    - headers:
+      - name: version
+        value: v2
+    backendRefs:
+    - name: beta-v2-svc
+      port: 80
+  - backendRefs:
+    - name: beta-v1-svc
+      port: 80`,
+        verification: "kubectl get httproute version-router -n beta\nkubectl describe httproute version-router -n beta"
+      },
+      {
+        number: "Q5",
+        category: "Filters",
+        title: "HTTP Path Redirects",
+        points: "1 Point",
+        challenge: "Create an HTTPRoute named `legacy-redirect` in the `default` namespace. It should attach to `shared-gateway` in `infra-ns` and match traffic for the host `example.com`. If a request has the path prefix `/legacy`, redirect it with a `301` (Moved Permanently) status code to the path prefix `/new-api`. No traffic should hit a backend service for this rule.",
+        strategy: "Use the `RequestRedirect` filter within your match rule. Define the type as `ReplacePrefixMatch` with the `replacePrefixMatch` value set to `/new-api` and statusCode set to `301`. Since this is a pure redirect filter, no backendRefs are needed for this rule.",
+        filename: "legacy-redirect.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">legacy-redirect</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">matches</span>:
+    - <span class="yaml-key">path</span>:
+        <span class="yaml-key">type</span>: <span class="string">PathPrefix</span>
+        <span class="yaml-key">value</span>: <span class="string">/legacy</span>
+    <span class="yaml-key">filters</span>:
+    - <span class="yaml-key">type</span>: <span class="string">RequestRedirect</span>
+      <span class="yaml-key">requestRedirect</span>:
+        <span class="yaml-key">path</span>:
+          <span class="yaml-key">type</span>: <span class="string">ReplacePrefixMatch</span>
+          <span class="yaml-key">replacePrefixMatch</span>: <span class="string">/new-api</span>
+        <span class="yaml-key">statusCode</span>: <span class="number">301</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: legacy-redirect
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /legacy
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /new-api
+        statusCode: 301`,
+        verification: "kubectl get httproute legacy-redirect -n default\nkubectl describe httproute legacy-redirect -n default"
+      },
+      {
+        number: "Q6",
+        category: "Filters",
+        title: "URL Prefix Rewriting",
+        points: "1 Point",
+        challenge: "Create an HTTPRoute named `rewrite-route` in the `default` namespace. It should attach to `shared-gateway` in `infra-ns` and match traffic for the host `example.com`. When requests hit path prefix `/v1/service`, rewrite the URL path prefix to `/service` before forwarding the request to the Service `backend-svc` on port `8080` in the `default` namespace.",
+        strategy: "Leverage the `URLRewrite` filter inside your match rules. Define the path rewriting type as `ReplacePrefixMatch` targeting the replacement value `/service`. Provide the destination backendRef `backend-svc` on port `8080` in the same rule.",
+        filename: "rewrite-route.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">rewrite-route</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">matches</span>:
+    - <span class="yaml-key">path</span>:
+        <span class="yaml-key">type</span>: <span class="string">PathPrefix</span>
+        <span class="yaml-key">value</span>: <span class="string">/v1/service</span>
+    <span class="yaml-key">filters</span>:
+    - <span class="yaml-key">type</span>: <span class="string">URLRewrite</span>
+      <span class="yaml-key">urlRewrite</span>:
+        <span class="yaml-key">path</span>:
+          <span class="yaml-key">type</span>: <span class="string">ReplacePrefixMatch</span>
+          <span class="yaml-key">replacePrefixMatch</span>: <span class="string">/service</span>
+    <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">backend-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">8080</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: rewrite-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /v1/service
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplacePrefixMatch
+          replacePrefixMatch: /service
+    backendRefs:
+    - name: backend-svc
+      port: 8080`,
+        verification: "kubectl get httproute rewrite-route -n default\nkubectl describe httproute rewrite-route -n default"
+      },
+      {
+        number: "Q7",
+        category: "Security",
+        title: "Cross-Namespace Ingress Restrictions",
+        points: "1 Point",
+        challenge: "Create a Gateway resource named `secure-gateway` in the `secure-infra` namespace using the `envoy-gateway` GatewayClass. The Gateway should listen on port `80` (HTTP) with name `http`. Restrict route attachment: configure the listener to only accept HTTPRoutes from namespaces that have the label `environment: production`.",
+        strategy: "Under `allowedRoutes` for the listener, configure the namespaces selection mode `from` to `Selector`. Define a `selector` block with `matchLabels` specifying `environment: production`. This ensures only routes from labeled environments attach.",
+        filename: "secure-gateway.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">Gateway</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">secure-gateway</span>
+  <span class="yaml-key">namespace</span>: <span class="string">secure-infra</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">gatewayClassName</span>: <span class="string">envoy-gateway</span>
+  <span class="yaml-key">listeners</span>:
+  - <span class="yaml-key">name</span>: <span class="string">http</span>
+    <span class="yaml-key">protocol</span>: <span class="string">HTTP</span>
+    <span class="yaml-key">port</span>: <span class="number">80</span>
+    <span class="yaml-key">allowedRoutes</span>:
+      <span class="yaml-key">namespaces</span>:
+        <span class="yaml-key">from</span>: <span class="string">Selector</span>
+        <span class="yaml-key">selector</span>:
+          <span class="yaml-key">matchLabels</span>:
+            <span class="yaml-key">environment</span>: <span class="string">production</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: secure-gateway
+  namespace: secure-infra
+spec:
+  gatewayClassName: envoy-gateway
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            environment: production`,
+        verification: "kubectl get gateway secure-gateway -n secure-infra\nkubectl describe gateway secure-gateway -n secure-infra"
+      },
+      {
+        number: "Q8",
+        category: "Troubleshooting",
+        title: "Troubleshooting Route Attachment",
+        points: "1 Point",
+        challenge: "A pre-deployed HTTPRoute named `broken-route` in the `gamma` namespace is currently failing to attach to `shared-gateway`. Diagnose why it is not reconciling properly, and fix all errors in the HTTPRoute definition so that it attaches successfully to `shared-gateway` and achieves a `Reconciled` / `Accepted` status.",
+        strategy: "Identify two critical errors: 1. The parentRef lacks `namespace: infra-ns`, causing it to look for a gateway in its own `gamma` namespace. 2. The backend destination is named `gamma-service`, but the service in the cluster is actually named `gamma-svc`. Fix these errors in the manifest and apply the correction.",
+        filename: "broken-route.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">broken-route</span>
+  <span class="yaml-key">namespace</span>: <span class="string">gamma</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"gamma.example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">gamma-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: broken-route
+  namespace: gamma
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "gamma.example.com"
+  rules:
+  - backendRefs:
+    - name: gamma-svc
+      port: 80`,
+        verification: "kubectl get httproute broken-route -n gamma -o wide\nkubectl get httproute broken-route -n gamma -o jsonpath='{.status.parents[0].conditions[?(@.type==\"Accepted\")]}'"
+      },
+      {
+        number: "Q9",
+        category: "Filters",
+        title: "HTTP Response Header Modification",
+        points: "1 Point",
+        challenge: "Create an HTTPRoute named `header-enricher` in the `default` namespace. It should attach to `shared-gateway` in `infra-ns` and match traffic for host `web.example.com`. Route traffic to the Service `web-svc` on port `80`. Apply a filter to inject a custom response header `x-gateway-provider: envoy` on all successfully completed requests.",
+        strategy: "Configure a `ResponseHeaderModifier` filter on your route rule. Within the `responseHeaderModifier` structure, define a `set` array specifying a `name` of `x-gateway-provider` and `value` of `envoy`. Define the backendRef to `web-svc` on port `80`.",
+        filename: "header-enricher.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">header-enricher</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"web.example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">filters</span>:
+    - <span class="yaml-key">type</span>: <span class="string">ResponseHeaderModifier</span>
+      <span class="yaml-key">responseHeaderModifier</span>:
+        <span class="yaml-key">set</span>:
+        - <span class="yaml-key">name</span>: <span class="string">x-gateway-provider</span>
+          <span class="yaml-key">value</span>: <span class="string">envoy</span>
+    <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">web-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: header-enricher
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "web.example.com"
+  rules:
+  - filters:
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        set:
+        - name: x-gateway-provider
+          value: envoy
+    backendRefs:
+    - name: web-svc
+      port: 80`,
+        verification: "kubectl get httproute header-enricher -n default\nkubectl describe httproute header-enricher -n default"
+      },
+      {
+        number: "Q10",
+        category: "Advanced Routing",
+        title: "Multi-Host Routing",
+        points: "1 Point",
+        challenge: "Create a single HTTPRoute named `multi-host-route` in the `default` namespace. It should attach to `shared-gateway` in `infra-ns`. Configure the route to handle traffic for two distinct hostnames: Requests for `shop.example.com` should route to Service `shop-svc` on port `80`, and requests for `blog.example.com` should route to Service `blog-svc` on port `80`.",
+        strategy: "To routing-split multiple hostnames in a single route resource, list both `shop.example.com` and `blog.example.com` under `hostnames`. Create two distinct rule matching blocks: each using `headers` match selector on the incoming `host` header to map the corresponding backend service.",
+        filename: "multi-host-route.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">gateway.networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HTTPRoute</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">multi-host-route</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">parentRefs</span>:
+  - <span class="yaml-key">name</span>: <span class="string">shared-gateway</span>
+    <span class="yaml-key">namespace</span>: <span class="string">infra-ns</span>
+  <span class="yaml-key">hostnames</span>:
+  - <span class="string">"shop.example.com"</span>
+  - <span class="string">"blog.example.com"</span>
+  <span class="yaml-key">rules</span>:
+  - <span class="yaml-key">matches</span>:
+    - <span class="yaml-key">headers</span>:
+      - <span class="yaml-key">name</span>: <span class="string">host</span>
+        <span class="yaml-key">value</span>: <span class="string">shop.example.com</span>
+    <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">shop-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>
+  - <span class="yaml-key">matches</span>:
+    - <span class="yaml-key">headers</span>:
+      - <span class="yaml-key">name</span>: <span class="string">host</span>
+        <span class="yaml-key">value</span>: <span class="string">blog.example.com</span>
+    <span class="yaml-key">backendRefs</span>:
+    - <span class="yaml-key">name</span>: <span class="string">blog-svc</span>
+      <span class="yaml-key">port</span>: <span class="number">80</span>`,
+        plainCode: `apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: multi-host-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: shared-gateway
+    namespace: infra-ns
+  hostnames:
+  - "shop.example.com"
+  - "blog.example.com"
+  rules:
+  - matches:
+    - headers:
+      - name: host
+        value: shop.example.com
+    backendRefs:
+    - name: shop-svc
+      port: 80
+  - matches:
+    - headers:
+      - name: host
+        value: blog.example.com
+    backendRefs:
+    - name: blog-svc
+      port: 80`,
+        verification: "kubectl get httproute multi-host-route -n default\nkubectl describe httproute multi-host-route -n default"
+      }
+    ];
+
+    let masteredList = JSON.parse(localStorage.getItem('mastered_exam03') || '[]');
+
+    function initSidebar() {
+      const menu = document.getElementById('sidebar-menu');
+      menu.innerHTML = '';
+      
+      questions.forEach((q, idx) => {
+        const isCompleted = masteredList.includes(q.number);
+        const item = document.createElement('div');
+        item.className = `menu-item ${isCompleted ? 'completed' : ''}`;
+        item.id = `menu-item-${idx}`;
+        item.onclick = () => selectQuestion(idx);
+        
+        item.innerHTML = `
+          <div class="menu-item-checkbox">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="menu-item-details">
+            <span class="menu-item-number">${q.number} &bull; ${q.category}</span>
+            <span class="menu-item-title">${q.title}</span>
+          </div>
+        `;
+        menu.appendChild(item);
+      });
+      
+      updateProgressBar();
+    }
+
+    function initPanels() {
+      const container = document.getElementById('solutions-container');
+      container.innerHTML = '';
+      
+      questions.forEach((q, idx) => {
+        const isCompleted = masteredList.includes(q.number);
+        const panel = document.createElement('div');
+        panel.className = `solution-panel ${isCompleted ? 'completed-panel' : ''}`;
+        panel.id = `solution-panel-${idx}`;
+        
+        panel.innerHTML = `
+          <div>
+            <span style="font-size: 12px; text-transform: uppercase; font-weight: 700; color: #10b981; tracking-widest: 1px">${q.category}</span>
+            <h2 style="font-size: 24px; font-weight: 800; margin-top: 4px">${q.number}: ${q.title} (${q.points})</h2>
+          </div>
+          
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>The Challenge Description</span>
+            </div>
+            <div class="challenge-card">${q.challenge}</div>
+          </div>
+
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              <span>Solution Design & Strategy</span>
+            </div>
+            <div class="strategy-card">${q.strategy}</div>
+          </div>
+
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <span>Complete Solution Code</span>
+            </div>
+            <div class="ide-container">
+              <div class="ide-header">
+                <div class="ide-dots">
+                  <div class="ide-dot ide-dot-red"></div>
+                  <div class="ide-dot ide-dot-yellow"></div>
+                  <div class="ide-dot ide-dot-green"></div>
+                </div>
+                <div class="ide-filename">${q.filename}</div>
+                <button class="copy-btn" onclick="copyManifest(${idx})">
+                  <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>Copy Code</span>
+                </button>
+              </div>
+              <pre class="ide-body"><code>${q.code}</code></pre>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span>Verification Checklist</span>
+            </div>
+            <div class="verification-box">
+              <div class="verification-icon">
+                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="verification-details">
+                <span class="verification-title">Correctness Check</span>
+                <span class="verification-desc">${q.verification}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="mastered-btn" onclick="toggleMastered(${idx})">
+              <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2.5px; fill:none"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="master-btn-text-${idx}">${isCompleted ? 'Question Mastered!' : 'Mark as Mastered'}</span>
+            </button>
+            
+            <div class="nav-buttons">
+              <button class="nav-btn" onclick="selectQuestion(${idx - 1})" ${idx === 0 ? 'disabled' : ''}>
+                &larr; Previous Question
+              </button>
+              <button class="nav-btn" onclick="selectQuestion(${idx + 1})" ${idx === questions.length - 1 ? 'disabled' : ''}>
+                Next Question &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(panel);
+      });
+    }
+
+    function selectQuestion(index) {
+      document.getElementById('intro-panel').style.display = 'none';
+      
+      // Hide all panels
+      const panels = document.querySelectorAll('.solution-panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      // Remove all active sidebar menu-items
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => item.classList.remove('active'));
+      
+      // Show selected panel
+      const selectedPanel = document.getElementById(`solution-panel-${index}`);
+      if (selectedPanel) {
+        selectedPanel.classList.add('active');
+      }
+      
+      // Highlight sidebar item
+      const selectedMenu = document.getElementById(`menu-item-${index}`);
+      if (selectedMenu) {
+        selectedMenu.classList.add('active');
+      }
+      
+      // Update main panel header tags dynamically
+      const q = questions[index];
+      document.getElementById('header-title').innerText = `${q.number}: ${q.title}`;
+      document.getElementById('header-subtitle').innerText = `CKA Competency Domain: ${q.category}`;
+    }
+
+    function toggleMastered(index) {
+      const q = questions[index];
+      const menu = document.getElementById(`menu-item-${index}`);
+      const panel = document.getElementById(`solution-panel-${index}`);
+      const btnText = document.getElementById(`master-btn-text-${index}`);
+      
+      if (masteredList.includes(q.number)) {
+        // Remove mastery
+        masteredList = masteredList.filter(n => n !== q.number);
+        menu.classList.remove('completed');
+        panel.classList.remove('completed-panel');
+        btnText.innerText = "Mark as Mastered";
+        showToast("Mastery removed");
+      } else {
+        // Add mastery
+        masteredList.push(q.number);
+        menu.classList.add('completed');
+        panel.classList.add('completed-panel');
+        btnText.innerText = "Question Mastered!";
+        showToast("Added to mastered topics!", true);
+      }
+      
+      localStorage.setItem('mastered_exam03', JSON.stringify(masteredList));
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const percent = Math.round((masteredList.length / questions.length) * 100);
+      document.getElementById('progress-percent').innerText = `${percent}%`;
+      document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+    }
+
+    function copyManifest(index) {
+      const text = questions[index].plainCode;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Solution code copied to clipboard!", true);
+      });
+    }
+
+    function showToast(message, isSuccess = false) {
+      const toast = document.getElementById('toast-notification');
+      const text = document.getElementById('toast-text');
+      
+      text.innerText = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Initialize elements
+    initSidebar();
+    initPanels();
+  </script>
+</body>
+</html>

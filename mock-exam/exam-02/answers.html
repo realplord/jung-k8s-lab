@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CKA Mock Exam 02 Solutions | Antigravity K8s Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070f14;
+      --panel-dark: rgba(13, 27, 34, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      
+      --neon-primary: #10b981;
+      --neon-secondary: #06b6d4;
+      --neon-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      --neon-glow: 0 0 20px rgba(16, 185, 129, 0.25);
+      
+      --accent-blue: #3b82f6;
+      --accent-yellow: #fbbf24;
+      --accent-red: #ef4444;
+      
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* App Container */
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: rgba(6, 14, 18, 0.85);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-color);
+      background: linear-gradient(to bottom, rgba(16, 185, 129, 0.05), transparent);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--neon-gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--neon-glow);
+    }
+
+    .logo-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: #fff;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: var(--neon-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-badge {
+      font-size: 11px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .progress-section {
+      margin-top: 16px;
+    }
+
+    .progress-bar-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--neon-gradient);
+      width: 0%;
+      transition: width 0.4s ease;
+      box-shadow: var(--neon-glow);
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .menu-item.active {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.25);
+      box-shadow: inset 0 0 12px rgba(16, 185, 129, 0.05);
+    }
+
+    .menu-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 25%;
+      height: 50%;
+      width: 4px;
+      background: var(--neon-gradient);
+      border-radius: 0 4px 4px 0;
+      box-shadow: var(--neon-glow);
+    }
+
+    .menu-item-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border-color);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .menu-item-checkbox svg {
+      width: 10px;
+      height: 10px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 3px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.2s;
+    }
+
+    .menu-item.completed .menu-item-checkbox {
+      background: var(--neon-primary);
+      border-color: var(--neon-primary);
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .menu-item.completed .menu-item-checkbox svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .menu-item-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      overflow: hidden;
+    }
+
+    .menu-item-number {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .menu-item.active .menu-item-number {
+      color: #34d399;
+    }
+
+    .menu-item-title {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-main);
+    }
+
+    .sidebar-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-color);
+      background: rgba(6, 14, 18, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 40px;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.03) 0px, transparent 50%);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Header Panel */
+    .header-panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(12px);
+    }
+
+    .header-panel-info h1 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-panel-info p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .meta-tags {
+      display: flex;
+      gap: 12px;
+    }
+
+    .meta-tag {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .meta-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--neon-primary);
+      stroke-width: 2px;
+    }
+
+    /* Solution Panel */
+    .solution-panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .solution-panel.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .panel-section-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+
+    .panel-section-title svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--neon-primary);
+      stroke-width: 2px;
+    }
+
+    .challenge-card {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 18px 24px;
+      line-height: 1.6;
+      font-size: 15px;
+      color: #e5e7eb;
+    }
+
+    .strategy-card {
+      background: rgba(16, 185, 129, 0.02);
+      border-left: 4px solid var(--neon-primary);
+      border-radius: 0 12px 12px 0;
+      padding: 18px 24px;
+      line-height: 1.6;
+      font-size: 14px;
+      color: #d1d5db;
+    }
+
+    /* Code Container / IDE style */
+    .ide-container {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: #04090d;
+      overflow: hidden;
+      margin-top: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .ide-header {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .ide-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .ide-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+    }
+
+    .ide-dot-red { background: #ef4444; }
+    .ide-dot-yellow { background: #f59e0b; }
+    .ide-dot-green { background: #10b981; }
+
+    .ide-filename {
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .copy-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      stroke-width: 2px;
+      fill: none;
+    }
+
+    .ide-body {
+      padding: 20px;
+      overflow-x: auto;
+      margin: 0;
+    }
+
+    .ide-body code {
+      font-family: 'Fira Code', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #a7f3d0;
+      display: block;
+      white-space: pre;
+    }
+
+    .comment { color: #57606a; }
+    .keyword { color: #ff7b72; font-weight: 500; }
+    .string { color: #a5d6ff; }
+    .number { color: #79c0ff; }
+    .variable { color: #ffa657; }
+    .symbol { color: #79c0ff; }
+    .yaml-key { color: #7ee787; }
+
+    /* Verification Box */
+    .verification-box {
+      background: rgba(16, 185, 129, 0.02);
+      border: 1px dashed rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .verification-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--neon-primary);
+    }
+
+    .verification-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2px;
+      fill: none;
+    }
+
+    .verification-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .verification-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #34d399;
+    }
+
+    .verification-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Mastered Footer Action */
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 24px;
+      margin-top: 16px;
+    }
+
+    .mastered-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .mastered-btn:hover {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .solution-panel.completed-panel .mastered-btn {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: var(--neon-primary);
+      color: #34d399;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      background: transparent;
+      border-color: var(--border-color);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(6, 14, 18, 0.9);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--neon-glow);
+      padding: 14px 24px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 999;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--neon-primary);
+      stroke-width: 3px;
+      fill: none;
+    }
+
+    /* Intro Panel */
+    .intro-panel {
+      background: var(--panel-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 48px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 24px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .intro-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--neon-gradient);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--neon-glow);
+      margin-bottom: 8px;
+    }
+
+    .intro-icon svg {
+      width: 44px;
+      height: 44px;
+      fill: #fff;
+    }
+
+    .intro-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .intro-desc {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    .start-btn {
+      background: var(--neon-gradient);
+      border: none;
+      color: #fff;
+      padding: 16px 36px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: var(--neon-glow);
+      transition: all 0.25s;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-1.3,1.3a1,1,0,0,0-.21,1.09A1,1,0,0,0,3.67,21.3l.08,0h4A10,10,0,1,0,12,2Zm5.71,14.29a1,1,0,0,1-1.42,0L14,14l-2.29,2.29a1,1,0,0,1-1.42,0,1,1,0,0,1,0-1.42L12.59,12,10.29,9.71a1,1,0,0,1,0-1.42,1,1,0,0,1,1.42,0L14,10.59l2.29-2.29a1,1,0,0,1,1.42,1.42L15.41,12l2.3,2.29A1,1,0,0,1,17.71,16.29Z"/>
+            </svg>
+          </div>
+          <span class="logo-text">Antigravity Labs</span>
+        </div>
+        <div>
+          <span class="logo-badge">CKA Mock Exam 02</span>
+        </div>
+        
+        <div class="progress-section">
+          <div class="progress-text">
+            <span>Mastery Progress</span>
+            <span id="progress-percent">0%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+      
+      <nav class="sidebar-menu" id="sidebar-menu">
+        <!-- Sidebar items loaded via JS -->
+      </nav>
+      
+      <div class="sidebar-footer">
+        <span>CKA Syllabus v1.30+</span>
+        <span>10 Questions</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Info Panel -->
+      <div class="header-panel">
+        <div class="header-panel-info">
+          <h1 id="header-title">Exam 02 Solution Guide</h1>
+          <p id="header-subtitle">Select a question from the sidebar to view its step-by-step master plan.</p>
+        </div>
+        
+        <div class="meta-tags">
+          <div class="meta-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>120 Mins Limit</span>
+          </div>
+          <div class="meta-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>70% Passing Score</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intro Panel -->
+      <div class="intro-panel" id="intro-panel">
+        <div class="intro-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12,2A10,10,0,0,0,2,12a9.89,9.89,0,0,0,2.26,6.33l-1.3,1.3a1,1,0,0,0-.21,1.09A1,1,0,0,0,3.67,21.3l.08,0h4A10,10,0,1,0,12,2Zm5.71,14.29a1,1,0,0,1-1.42,0L14,14l-2.29,2.29a1,1,0,0,1-1.42,0,1,1,0,0,1,0-1.42L12.59,12,10.29,9.71a1,1,0,0,1,0-1.42,1,1,0,0,1,1.42,0L14,10.59l2.29-2.29a1,1,0,0,1,1.42,1.42L15.41,12l2.3,2.29A1,1,0,0,1,17.71,16.29Z"/>
+          </svg>
+        </div>
+        <h2 class="intro-title">CKA Mock Exam 02 Solution Guide</h2>
+        <p class="intro-desc">
+          Welcome to the Antigravity study portal. This dashboard hosts the interactive step-by-step master configurations, solutions, and terminal one-liners to clear your CKA exam easily. Drill down on node maintenance, volume expansion, advanced RBAC, and cross-namespace network policies!
+        </p>
+        <button class="start-btn" onclick="selectQuestion(0)">Get Started</button>
+      </div>
+
+      <!-- Solution Panels (Loaded via JS) -->
+      <div id="solutions-container"></div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Alert -->
+  <div class="toast" id="toast-notification">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-text">Manifest copied to clipboard!</span>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        number: "Q1",
+        category: "Maintenance",
+        title: "Node Drain & Cordon",
+        points: "1 Point",
+        challenge: "Drain the node worker-2 to prepare it for maintenance. Ensure all pods are evicted safely, ignoring DaemonSets and local data (emptyDir volume) if necessary.",
+        strategy: "Use the kubectl drain command. Pass the --ignore-daemonsets flag to preserve system networking components, and --delete-emptydir-data because some pods might store transient files in emptyDir mounts. Use --force to evict pods not managed by a controller.",
+        filename: "drain-node.sh",
+        code: `<span class="comment"># Safely drain the node worker-2</span>
+<span class="keyword">kubectl</span> drain worker-2 --ignore-daemonsets --delete-emptydir-data --force`,
+        plainCode: "kubectl drain worker-2 --ignore-daemonsets --delete-emptydir-data --force",
+        verification: "Verify node status transitions to 'Ready,SchedulingDisabled' using: kubectl get nodes"
+      },
+      {
+        number: "Q2",
+        category: "Cluster Config",
+        title: "ETCD Database Backup",
+        points: "1 Point",
+        challenge: "Take a snapshot backup of the etcd database running on the control plane node. Save the backup at /var/tmp/etcd-snapshot.db.",
+        strategy: "Configure the ETCDCTL_API=3 environment variable and utilize the etcdctl command. Authenticate using the Kubernetes cluster's local PKI credentials, referencing the ca, cert, and key paths stored in /etc/kubernetes/pki/etcd/.",
+        filename: "backup-etcd.sh",
+        code: `<span class="comment"># Execute snapshot using TLS credentials</span>
+<span class="keyword">sudo</span> ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 \\
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \\
+  --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \\
+  --key=/etc/kubernetes/pki/etcd/healthcheck-client.key \\
+  snapshot save /var/tmp/etcd-snapshot.db`,
+        plainCode: "sudo ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt --key=/etc/kubernetes/pki/etcd/healthcheck-client.key snapshot save /var/tmp/etcd-snapshot.db",
+        verification: "Validate the integrity of the database snapshot: sudo ETCDCTL_API=3 etcdctl --write-out=table snapshot status /var/tmp/etcd-snapshot.db"
+      },
+      {
+        number: "Q3",
+        category: "Workloads",
+        title: "Horizontal Pod Autoscaler",
+        points: "1 Point",
+        challenge: "Create a HorizontalPodAutoscaler named web-app-hpa for the existing deployment named web-app in the production namespace. The HPA should scale between 2 and 6 replicas, targeting a CPU utilization of 60%.",
+        strategy: "Define the HPA declaratively to ensure exact name binding ('web-app-hpa') since imperative kubectl autoscale inherits the deployment's name. Wire it to target deployment/web-app in the production namespace.",
+        filename: "web-app-hpa.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">autoscaling/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">HorizontalPodAutoscaler</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">web-app-hpa</span>
+  <span class="yaml-key">namespace</span>: <span class="string">production</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">scaleTargetRef</span>:
+    <span class="yaml-key">apiVersion</span>: <span class="string">apps/v1</span>
+    <span class="yaml-key">kind</span>: <span class="string">Deployment</span>
+    <span class="yaml-key">name</span>: <span class="string">web-app</span>
+  <span class="yaml-key">minReplicas</span>: <span class="number">2</span>
+  <span class="yaml-key">maxReplicas</span>: <span class="number">6</span>
+  <span class="yaml-key">targetCPUUtilizationPercentage</span>: <span class="number">60</span>`,
+        plainCode: `apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-app-hpa
+  namespace: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-app
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60`,
+        verification: "Verify HPA parameters: kubectl get hpa web-app-hpa -n production"
+      },
+      {
+        number: "Q4",
+        category: "Troubleshooting",
+        title: "Sidecar Logging Pattern",
+        points: "1 Point",
+        challenge: "Create a multi-container pod named app-logger in the default namespace. The main container should be named app running busybox and writing a timestamp to /var/log/app.log. The sidecar container should stream the log file to stdout. Use an emptyDir volume for shared storage.",
+        strategy: "Build a single pod with two containers: 'app' (generating log data) and 'sidecar' (executing tail -F). Link them using a shared volume of type emptyDir mounted at `/var/log` on both containers.",
+        filename: "sidecar-logging.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">v1</span>
+<span class="yaml-key">kind</span>: <span class="string">Pod</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">app-logger</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">containers</span>:
+  - <span class="yaml-key">name</span>: <span class="string">app</span>
+    <span class="yaml-key">image</span>: <span class="string">busybox:1.36</span>
+    <span class="yaml-key">command</span>: [<span class="string">"/bin/sh"</span>, <span class="string">"-c"</span>]
+    <span class="yaml-key">args</span>:
+    - |
+      while true; do
+        echo "$(date) - Application log message" >> /var/log/app.log
+        sleep 5
+      done
+    <span class="yaml-key">volumeMounts:</span>
+    - <span class="yaml-key">name</span>: <span class="string">log-vol</span>
+      <span class="yaml-key">mountPath</span>: <span class="string">/var/log</span>
+  - <span class="yaml-key">name</span>: <span class="string">sidecar</span>
+    <span class="yaml-key">image</span>: <span class="string">busybox:1.36</span>
+    <span class="yaml-key">command</span>: [<span class="string">"/bin/sh"</span>, <span class="string">"-c"</span>]
+    <span class="yaml-key">args</span>: [<span class="string">"tail -F /var/log/app.log"</span>]
+    <span class="yaml-key">volumeMounts:</span>
+    - <span class="yaml-key">name</span>: <span class="string">log-vol</span>
+      <span class="yaml-key">mountPath</span>: <span class="string">/var/log</span>
+  <span class="yaml-key">volumes:</span>
+  - <span class="yaml-key">name</span>: <span class="string">log-vol</span>
+    <span class="yaml-key">emptyDir</span>: {}`,
+        plainCode: `apiVersion: v1
+kind: Pod
+metadata:
+  name: app-logger
+  namespace: default
+spec:
+  containers:
+  - name: app
+    image: busybox:1.36
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      while true; do
+        echo "$(date) - Application log message" >> /var/log/app.log
+        sleep 5
+      done
+    volumeMounts:
+    - name: log-vol
+      mountPath: /var/log
+  - name: sidecar
+    image: busybox:1.36
+    command: ["/bin/sh", "-c"]
+    args: ["tail -F /var/log/app.log"]
+    volumeMounts:
+    - name: log-vol
+      mountPath: /var/log
+  volumes:
+  - name: log-vol
+    emptyDir: {}`,
+        verification: "Verify streaming logs from the sidecar: kubectl logs app-logger -n default -c sidecar"
+      },
+      {
+        number: "Q5",
+        category: "Scheduling",
+        title: "Node Label & Selector",
+        points: "1 Point",
+        challenge: "Label the node worker-1 with disktype=ssd. Then, create a pod named ssd-pod running nginx in the default namespace that is scheduled only on nodes labeled with disktype=ssd.",
+        strategy: "First, apply the label to node worker-1 using kubectl label. Next, define a pod manifest specifying a nodeSelector which targets `disktype: ssd` to restrict scheduling.",
+        filename: "ssd-selector.yaml",
+        code: `<span class="comment"># 1. Label the node worker-1</span>
+<span class="keyword">kubectl</span> label node worker-1 disktype=ssd --overwrite
+
+<span class="comment"># 2. Deploy the pod with nodeSelector</span>
+<span class="yaml-key">apiVersion</span>: <span class="string">v1</span>
+<span class="yaml-key">kind</span>: <span class="string">Pod</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">ssd-pod</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">nodeSelector:</span>
+    <span class="yaml-key">disktype</span>: <span class="string">ssd</span>
+  <span class="yaml-key">containers:</span>
+  - <span class="yaml-key">name</span>: <span class="string">nginx</span>
+    <span class="yaml-key">image</span>: <span class="string">nginx:alpine</span>`,
+        plainCode: "kubectl label node worker-1 disktype=ssd --overwrite\n\napiVersion: v1\nkind: Pod\nmetadata:\n  name: ssd-pod\n  namespace: default\nspec:\n  nodeSelector:\n    disktype: ssd\n  containers:\n  - name: nginx\n    image: nginx:alpine",
+        verification: "Verify pod is running on worker-1: kubectl get pod ssd-pod -o wide"
+      },
+      {
+        number: "Q6",
+        category: "Storage",
+        title: "SC & PVC Volume Expansion",
+        points: "1 Point",
+        challenge: "Create a StorageClass expandable-sc with allowVolumeExpansion set to true. Create a PV pv-expand (1Gi, hostPath /opt/pv-expand). Create a PVC pvc-expand requesting 100Mi. Expand the PVC size to 200Mi.",
+        strategy: "Make sure allowVolumeExpansion: true is active on the StorageClass. Wait until the PVC has successfully bound to the PV, then issue a patch request on the PVC resource requests storage.",
+        filename: "volume-expansion.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">storage.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">StorageClass</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">expandable-sc</span>
+<span class="yaml-key">provisioner</span>: <span class="string">kubernetes.io/no-provisioner</span>
+<span class="yaml-key">allowVolumeExpansion</span>: <span class="number">true</span>
+<span class="yaml-key">volumeBindingMode</span>: <span class="string">Immediate</span>
+<span class="symbol">---</span>
+<span class="yaml-key">apiVersion</span>: <span class="string">v1</span>
+<span class="yaml-key">kind</span>: <span class="string">PersistentVolume</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">pv-expand</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">capacity</span>:
+    <span class="yaml-key">storage</span>: <span class="string">1Gi</span>
+  <span class="yaml-key">accessModes</span>:
+    - <span class="string">ReadWriteOnce</span>
+  <span class="yaml-key">persistentVolumeReclaimPolicy</span>: <span class="string">Retain</span>
+  <span class="yaml-key">storageClassName</span>: <span class="string">expandable-sc</span>
+  <span class="yaml-key">hostPath:</span>
+    <span class="yaml-key">path</span>: <span class="string">/opt/pv-expand</span>
+<span class="symbol">---</span>
+<span class="yaml-key">apiVersion</span>: <span class="string">v1</span>
+<span class="yaml-key">kind</span>: <span class="string">PersistentVolumeClaim</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">pvc-expand</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">accessModes:</span>
+    - <span class="string">ReadWriteOnce</span>
+  <span class="yaml-key">resources:</span>
+    <span class="yaml-key">requests:</span>
+      <span class="yaml-key">storage</span>: <span class="string">100Mi</span>
+  <span class="yaml-key">storageClassName</span>: <span class="string">expandable-sc</span>
+
+<span class="comment"># Wait for Binding, then patch the PVC capacity:</span>
+<span class="keyword">kubectl</span> patch pvc pvc-expand -n default -p <span class="string">'{"spec":{"resources":{"requests":{"storage":"200Mi"}}}}'</span>`,
+        plainCode: `apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: expandable-sc
+provisioner: kubernetes.io/no-provisioner
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-expand
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: expandable-sc
+  hostPath:
+    path: /opt/pv-expand
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-expand
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+  storageClassName: expandable-sc
+
+# Run after binding:
+kubectl patch pvc pvc-expand -n default -p '{"spec":{"resources":{"requests":{"storage":"200Mi"}}}}'`,
+        verification: "Verify expanded capacity (200Mi): kubectl get pvc pvc-expand -n default"
+      },
+      {
+        number: "Q7",
+        category: "Troubleshooting",
+        title: "Crashing Pod Log Diagnosis",
+        points: "1 Point",
+        challenge: "A pod named db-monitor in the database namespace is crashing. Diagnose the issue, find the exact log line containing the word FATAL in the container logs, and write it to /var/tmp/db-error.txt.",
+        strategy: "Use the kubectl logs command to query standard and error outputs of the crashing container, pipe it to grep searching for 'FATAL', and write it out directly using redirections.",
+        filename: "find-error.sh",
+        code: `<span class="comment"># Extract log containing FATAL and save to target</span>
+<span class="keyword">kubectl</span> logs db-monitor -n database 2>&1 | <span class="keyword">grep</span> <span class="string">"FATAL"</span> > /var/tmp/db-error.txt`,
+        plainCode: "kubectl logs db-monitor -n database 2>&1 | grep \"FATAL\" > /var/tmp/db-error.txt",
+        verification: "Verify log extract content matches target error: cat /var/tmp/db-error.txt"
+      },
+      {
+        number: "Q8",
+        category: "Services",
+        title: "NodePort Service Expose",
+        points: "1 Point",
+        challenge: "Create a Service of type NodePort named external-web-svc in the default namespace. It should expose the existing pod web-backend on port 80, routing to targetPort 80, with a nodePort of 32080.",
+        strategy: "Apply a Service declaration specifying ports configurations. Direct targetPort and port to 80, configure nodePort to 32080, and ensure selector matches labels 'app=web-backend'.",
+        filename: "nodeport-service.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">v1</span>
+<span class="yaml-key">kind</span>: <span class="string">Service</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">external-web-svc</span>
+  <span class="yaml-key">namespace</span>: <span class="string">default</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">type</span>: <span class="string">NodePort</span>
+  <span class="yaml-key">selector:</span>
+    <span class="yaml-key">app</span>: <span class="string">web-backend</span>
+  <span class="yaml-key">ports:</span>
+  - <span class="yaml-key">port</span>: <span class="number">80</span>
+    <span class="yaml-key">targetPort</span>: <span class="number">80</span>
+    <span class="yaml-key">nodePort</span>: <span class="number">32080</span>`,
+        plainCode: `apiVersion: v1
+kind: Service
+metadata:
+  name: external-web-svc
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: web-backend
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 32080`,
+        verification: "Verify service exists and holds correct mapping: kubectl get svc external-web-svc"
+      },
+      {
+        number: "Q9",
+        category: "RBAC",
+        title: "ClusterRole & ServiceAccount",
+        points: "1 Point",
+        challenge: "Create a ClusterRole named pod-reader that allows get, list, and watch operations on pods. Create a ServiceAccount named cluster-observer in the kube-system namespace. Bind the ClusterRole to the ServiceAccount globally using a ClusterRoleBinding named observer-binding.",
+        strategy: "Create a ClusterRole specification allowing read access on pods. Declare the ServiceAccount inside kube-system. Wire them globally using a ClusterRoleBinding resource.",
+        filename: "rbac-global.yaml",
+        code: `<span class="yaml-key">apiVersion</span>: <span class="string">rbac.authorization.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">ClusterRole</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">pod-reader</span>
+<span class="yaml-key">rules:</span>
+- <span class="yaml-key">apiGroups</span>: [<span class="string">""</span>]
+  <span class="yaml-key">resources</span>: [<span class="string">"pods"</span>]
+  <span class="yaml-key">verbs</span>: [<span class="string">"get"</span>, <span class="string">"list"</span>, <span class="string">"watch"</span>]
+<span class="symbol">---</span>
+<span class="yaml-key">apiVersion</span>: <span class="string">v1</span>
+<span class="yaml-key">kind</span>: <span class="string">ServiceAccount</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">cluster-observer</span>
+  <span class="yaml-key">namespace</span>: <span class="string">kube-system</span>
+<span class="symbol">---</span>
+<span class="yaml-key">apiVersion</span>: <span class="string">rbac.authorization.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">ClusterRoleBinding</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">observer-binding</span>
+<span class="yaml-key">roleRef:</span>
+  <span class="yaml-key">apiGroup</span>: <span class="string">rbac.authorization.k8s.io</span>
+  <span class="yaml-key">kind</span>: <span class="string">ClusterRole</span>
+  <span class="yaml-key">name</span>: <span class="string">pod-reader</span>
+<span class="yaml-key">subjects:</span>
+- <span class="yaml-key">kind</span>: <span class="string">ServiceAccount</span>
+  <span class="yaml-key">name</span>: <span class="string">cluster-observer</span>
+  <span class="yaml-key">namespace</span>: <span class="string">kube-system</span>`,
+        plainCode: `apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-reader
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cluster-observer
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: observer-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pod-reader
+subjects:
+- kind: ServiceAccount
+  name: cluster-observer
+  namespace: kube-system`,
+        verification: "Verify permission globally: kubectl auth can-i list pods --as=system:serviceaccount:kube-system:cluster-observer --all-namespaces"
+      },
+      {
+        number: "Q10",
+        category: "Networking",
+        title: "Cross-Namespace NetPol",
+        points: "1 Point",
+        challenge: "Create a NetworkPolicy named allow-db-access in the database namespace. The policy should allow incoming (ingress) traffic on port 5432 only from pods in the frontend namespace that have the label role=frontend. All other ingress traffic to pods in the database namespace should be blocked.",
+        strategy: "Ensure namespace frontend holds label 'name=frontend' so that it can be targeted by namespaceSelector. Apply NetworkPolicy in database namespace allowing ingress matching namespaceSelector name=frontend AND podSelector role=frontend on TCP port 5432.",
+        filename: "cross-ns-netpol.yaml",
+        code: `<span class="comment"># Label namespace frontend first</span>
+<span class="keyword">kubectl</span> label namespace frontend name=frontend --overwrite
+
+<span class="comment"># Apply NetworkPolicy in database namespace</span>
+<span class="yaml-key">apiVersion</span>: <span class="string">networking.k8s.io/v1</span>
+<span class="yaml-key">kind</span>: <span class="string">NetworkPolicy</span>
+<span class="yaml-key">metadata</span>:
+  <span class="yaml-key">name</span>: <span class="string">allow-db-access</span>
+  <span class="yaml-key">namespace</span>: <span class="string">database</span>
+<span class="yaml-key">spec</span>:
+  <span class="yaml-key">podSelector</span>: {}
+  <span class="yaml-key">policyTypes:</span>
+  - <span class="string">Ingress</span>
+  <span class="yaml-key">ingress:</span>
+  - <span class="yaml-key">from:</span>
+    - <span class="yaml-key">namespaceSelector:</span>
+        <span class="yaml-key">matchLabels:</span>
+          <span class="yaml-key">name</span>: <span class="string">frontend</span>
+      <span class="yaml-key">podSelector:</span>
+        <span class="yaml-key">matchLabels:</span>
+          <span class="yaml-key">role</span>: <span class="string">frontend</span>
+    <span class="yaml-key">ports:</span>
+    - <span class="yaml-key">protocol</span>: <span class="string">TCP</span>
+      <span class="yaml-key">port</span>: <span class="number">5432</span>`,
+        plainCode: "kubectl label namespace frontend name=frontend --overwrite\n\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-db-access\n  namespace: database\nspec:\n  podSelector: {}\n  policyTypes:\n  - Ingress\n  ingress:\n  - from:\n    - namespaceSelector:\n        matchLabels:\n          name: frontend\n      podSelector:\n        matchLabels:\n          role: frontend\n    ports:\n    - protocol: TCP\n      port: 5432",
+        verification: "Verify description of traffic constraints: kubectl describe networkpolicy allow-db-access -n database"
+      }
+    ];
+
+    let masteredList = JSON.parse(localStorage.getItem('mastered_exam02') || '[]');
+
+    function initSidebar() {
+      const menu = document.getElementById('sidebar-menu');
+      menu.innerHTML = '';
+      
+      questions.forEach((q, idx) => {
+        const isCompleted = masteredList.includes(q.number);
+        const item = document.createElement('div');
+        item.className = `menu-item ${isCompleted ? 'completed' : ''}`;
+        item.id = `menu-item-${idx}`;
+        item.onclick = () => selectQuestion(idx);
+        
+        item.innerHTML = `
+          <div class="menu-item-checkbox">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="menu-item-details">
+            <span class="menu-item-number">${q.number} &bull; ${q.category}</span>
+            <span class="menu-item-title">${q.title}</span>
+          </div>
+        `;
+        menu.appendChild(item);
+      });
+      
+      updateProgressBar();
+    }
+
+    function initPanels() {
+      const container = document.getElementById('solutions-container');
+      container.innerHTML = '';
+      
+      questions.forEach((q, idx) => {
+        const isCompleted = masteredList.includes(q.number);
+        const panel = document.createElement('div');
+        panel.className = `solution-panel ${isCompleted ? 'completed-panel' : ''}`;
+        panel.id = `solution-panel-${idx}`;
+        
+        panel.innerHTML = `
+          <div>
+            <span style="font-size: 12px; text-transform: uppercase; font-weight: 700; color: #10b981; tracking-widest: 1px">${q.category}</span>
+            <h2 style="font-size: 24px; font-weight: 800; margin-top: 4px">${q.number}: ${q.title} (${q.points})</h2>
+          </div>
+          
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>The Challenge Description</span>
+            </div>
+            <div class="challenge-card">${q.challenge}</div>
+          </div>
+
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9.663 17h4.673M12 3v1m6.364.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              <span>Solution Design & Strategy</span>
+            </div>
+            <div class="strategy-card">${q.strategy}</div>
+          </div>
+
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              <span>Complete Solution Code</span>
+            </div>
+            <div class="ide-container">
+              <div class="ide-header">
+                <div class="ide-dots">
+                  <div class="ide-dot ide-dot-red"></div>
+                  <div class="ide-dot ide-dot-yellow"></div>
+                  <div class="ide-dot ide-dot-green"></div>
+                </div>
+                <div class="ide-filename">${q.filename}</div>
+                <button class="copy-btn" onclick="copyManifest(${idx})">
+                  <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  <span>Copy Code</span>
+                </button>
+              </div>
+              <pre class="ide-body"><code>${q.code}</code></pre>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              <span>Verification Checklist</span>
+            </div>
+            <div class="verification-box">
+              <div class="verification-icon">
+                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="verification-details">
+                <span class="verification-title">Correctness Check</span>
+                <span class="verification-desc">${q.verification}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="mastered-btn" onclick="toggleMastered(${idx})">
+              <svg viewBox="0 0 24 24" style="width:16px; height:16px; stroke:currentColor; stroke-width:2.5px; fill:none"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="master-btn-text-${idx}">${isCompleted ? 'Question Mastered!' : 'Mark as Mastered'}</span>
+            </button>
+            
+            <div class="nav-buttons">
+              <button class="nav-btn" onclick="selectQuestion(${idx - 1})" ${idx === 0 ? 'disabled' : ''}>
+                &larr; Previous Question
+              </button>
+              <button class="nav-btn" onclick="selectQuestion(${idx + 1})" ${idx === questions.length - 1 ? 'disabled' : ''}>
+                Next Question &rarr;
+              </button>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(panel);
+      });
+    }
+
+    function selectQuestion(index) {
+      document.getElementById('intro-panel').style.display = 'none';
+      
+      // Hide all panels
+      const panels = document.querySelectorAll('.solution-panel');
+      panels.forEach(p => p.classList.remove('active'));
+      
+      // Remove all active sidebar menu-items
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => item.classList.remove('active'));
+      
+      // Show selected panel
+      const selectedPanel = document.getElementById(`solution-panel-${index}`);
+      if (selectedPanel) {
+        selectedPanel.classList.add('active');
+      }
+      
+      // Highlight sidebar item
+      const selectedMenu = document.getElementById(`menu-item-${index}`);
+      if (selectedMenu) {
+        selectedMenu.classList.add('active');
+      }
+      
+      // Update main panel header tags dynamically
+      const q = questions[index];
+      document.getElementById('header-title').innerText = `${q.number}: ${q.title}`;
+      document.getElementById('header-subtitle').innerText = `CKA Competency Domain: ${q.category}`;
+    }
+
+    function toggleMastered(index) {
+      const q = questions[index];
+      const menu = document.getElementById(`menu-item-${index}`);
+      const panel = document.getElementById(`solution-panel-${index}`);
+      const btnText = document.getElementById(`master-btn-text-${index}`);
+      
+      if (masteredList.includes(q.number)) {
+        // Remove mastery
+        masteredList = masteredList.filter(n => n !== q.number);
+        menu.classList.remove('completed');
+        panel.classList.remove('completed-panel');
+        btnText.innerText = "Mark as Mastered";
+        showToast("Mastery removed");
+      } else {
+        // Add mastery
+        masteredList.push(q.number);
+        menu.classList.add('completed');
+        panel.classList.add('completed-panel');
+        btnText.innerText = "Question Mastered!";
+        showToast("Added to mastered topics!", true);
+      }
+      
+      localStorage.setItem('mastered_exam02', JSON.stringify(masteredList));
+      updateProgressBar();
+    }
+
+    function updateProgressBar() {
+      const percent = Math.round((masteredList.length / questions.length) * 100);
+      document.getElementById('progress-percent').innerText = `${percent}%`;
+      document.getElementById('progress-bar-fill').style.width = `${percent}%`;
+    }
+
+    function copyManifest(index) {
+      const text = questions[index].plainCode;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("Solution code copied to clipboard!", true);
+      });
+    }
+
+    function showToast(message, isSuccess = false) {
+      const toast = document.getElementById('toast-notification');
+      const text = document.getElementById('toast-text');
+      
+      text.innerText = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Initialize elements
+    initSidebar();
+    initPanels();
+  </script>
+</body>
+</html>
